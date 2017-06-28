@@ -42,8 +42,13 @@
     <script src="~/lib/resumable.js/resumable.js"></script>
     <script>
         var r = new Resumable({
+            // The path to upload files to
             target: 'api/File/Upload',
+            // chunk size of 1mb, this is the default.
             chunkSize: 1 * 1024 * 1024,
+            // By default the unique identifier is the file name.
+            // In a real scenario the server would provide a unique identifier for file uploads
+            // For now, JS will create a "close enough" GUID.
             generateUniqueIdentifier: function() {
                 function s4() {
                     return Math.floor((1 + Math.random()) * 0x10000)
@@ -54,9 +59,12 @@
                     s4() + '-' + s4() + s4() + s4();
             }
         });
-        
+
+        // Map the upload button to the resumable.js api.
         r.assignBrowse(document.getElementById('browseButton'));
 
+        // Everything below this point is logging.
+        // Errors will be displayed in the UI, for more details logging see the browser's console output.
         r.on('fileSuccess',
             function(file) {
                 console.debug('fileSuccess', file);
@@ -96,6 +104,7 @@
         r.on('progress',
             function() {
                 console.debug('progress');
+                // Update the progress in the UI
                 $('#file-progress').text((r.progress() * 100) + '%');
             });
         r.on('error',
