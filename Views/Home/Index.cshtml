@@ -1,0 +1,115 @@
+﻿@using Microsoft.AspNetCore.Mvc
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>Chunked upload test</h2>
+        
+        <p>Want a test file? Try <a href="http://aka.ms/MicroservicesEbook">http://aka.ms/MicroservicesEbook</a></p>
+
+        <a class="btn btn-default" href="#" id="browseButton">Select files</a>
+
+        <div>
+            <strong>Progress:</strong> <span id="file-progress"></span>
+        </div>
+        <div>
+            <strong>Errors:</strong>
+            <ul id="error-list">
+                
+            </ul>
+        </div>
+
+    </div>
+    <div class="col-md-12">
+        <hr/>
+        <h2>Form upload test</h2>
+
+        <form asp-action="Index" asp-controller="Home" method="post">
+            
+            <input type="file" name="uploadedFile" placeholder="Select file" required/>
+            
+            <input class="btn btn-primary" type="submit" value="Upload"/>
+
+        </form>
+
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="~/lib/resumable.js/resumable.js"></script>
+    <script>
+        var r = new Resumable({
+            target: 'api/File/Upload',
+            chunkSize: 1 * 1024 * 1024,
+            generateUniqueIdentifier: function() {
+                function s4() {
+                    return Math.floor((1 + Math.random()) * 0x10000)
+                        .toString(16)
+                        .substring(1);
+                }
+                return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+                    s4() + '-' + s4() + s4() + s4();
+            }
+        });
+        
+        r.assignBrowse(document.getElementById('browseButton'));
+
+        r.on('fileSuccess',
+            function(file) {
+                console.debug('fileSuccess', file);
+            });
+        r.on('fileProgress',
+            function(file) {
+                console.debug('fileProgress', file);
+            });
+        r.on('fileAdded',
+            function(file, event) {
+                r.upload();
+                console.debug('fileAdded', event);
+            });
+        r.on('filesAdded',
+            function(array) {
+                r.upload();
+                console.debug('filesAdded', array);
+            });
+        r.on('fileRetry',
+            function(file) {
+                console.debug('fileRetry', file);
+                $('#error-list').append($('<li/>', { text: 'Error while uploading file, retrying.  See dev console/network log for more details.' }));
+            });
+        r.on('fileError',
+            function(file, message) {
+                console.debug('fileError', file, message);
+                $('#error-list').append($('<li/>', { text: 'File error: ' + message }));
+            });
+        r.on('uploadStart',
+            function() {
+                console.debug('uploadStart');
+            });
+        r.on('complete',
+            function() {
+                console.debug('complete');
+            });
+        r.on('progress',
+            function() {
+                console.debug('progress');
+                $('#file-progress').text((r.progress() * 100) + '%');
+            });
+        r.on('error',
+            function(message, file) {
+                console.debug('error', message, file);
+                $('#error-list').append($('<li/>', { text: 'Error: ' + message }));
+            });
+        r.on('pause',
+            function() {
+                console.debug('pause');
+            });
+        r.on('cancel',
+            function() {
+                console.debug('cancel');
+            });
+    </script>
+}
