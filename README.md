@@ -6,7 +6,7 @@ This is a minimal website to reporduce an error that occurs when chunking file u
 
 When uploading a large file using the JS File API to "chunk" the upload, passing through an Azure Application Gateway with a WAF in protection mode can sometimes cause a firewall rule to be hit. When this happens, one or more chunks of the file will faile to upload with the error `403 ModSecurity Action`. This issue does not happen for all chunks, but it is frequent enough that any 100mb file uploaded in 1 mb chunks is likely to fail.
 
-The firewall rule enountered is `200003 MULTIPART_UNMATCHED_BOUNDARY`. There have been reports of false positives for this rule [as early as 2013](https://github.com/SpiderLabs/ModSecurity/issues/652), with many people complaining that their firewall providers do not let them configure this rule.  This rule is also not configurable in Azure Application Gateway, so if you encounter this issue, you are out of luck.
+The firewall rule enountered is `200003 MULTIPART_UNMATCHED_BOUNDARY`. There have been reports of false positives for this rule [as early as 2014](https://github.com/SpiderLabs/ModSecurity/issues/652), with many people complaining that their firewall providers do not let them configure this rule.  This rule is also not configurable in Azure Application Gateway, so if you encounter this issue, you are out of luck.
 
 Tested in Chrome 55, IE 11
 
