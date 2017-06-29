@@ -6,9 +6,18 @@ This is a minimal website to reporduce an error that occurs when chunking file u
 
 When uploading a large file using the JS File API to "chunk" the upload, passing through an Azure Application Gateway with a WAF in protection mode can sometimes cause a firewall rule to be hit. When this happens, one or more chunks of the file will faile to upload with the error `403 ModSecurity Action`. This issue does not happen for all chunks, but it is frequent enough that any 100mb file uploaded in 1 mb chunks is likely to fail.
 
-The firewall rule enountered is `200003 MULTIPART_UNMATCHED_BOUNDARY`. There have been reports of false positives for this rule [as early as 2014](https://github.com/SpiderLabs/ModSecurity/issues/652), with many people complaining that their firewall providers do not let them configure this rule.  This rule is also not configurable in Azure Application Gateway, so if you encounter this issue, you are out of luck.
+The firewall rule enountered is `200004 MULTIPART_UNMATCHED_BOUNDARY`. There have been reports of false positives for this rule [as early as 2014](https://github.com/SpiderLabs/ModSecurity/issues/652), with many people complaining that their firewall providers do not let them configure this rule.  This rule is also not configurable in Azure Application Gateway, so if you encounter this issue, you are out of luck.
 
 Tested in Chrome 55, IE 11
+
+### **Update**
+
+There is now feedback from the developers of the OWASP Core Rule Set, which can be found here [https://github.com/SpiderLabs/owasp-modsecurity-crs/issues/827](https://github.com/SpiderLabs/owasp-modsecurity-crs/issues/827)
+
+TL:DR It looks like the only way to fix the issue is for the Microsoft Application Gateway team to update their OWASP configuration to ignore this rule. The rule in question is known to cause many false positives and the developer who responded personally recommends that the rule be removed from your configuration by default.
+
+If this issue affects you and you would like Microsoft to fix it, upvote the issue on Azure feedback: [https://feedback.azure.com/forums/34192--general-feedback/suggestions/19773868-support-chunked-file-transfers-through-azure-appli](https://feedback.azure.com/forums/34192--general-feedback/suggestions/19773868-support-chunked-file-transfers-through-azure-appli)
+
 
 ## How to reproduce the bug
 
@@ -26,7 +35,3 @@ At this point you will see two upload forms. The top one uses chunked uploading 
 Upload any file you want to see the error. Not all file have the issue but the chances increase as the size of the file increases. An example file that does reliably cause the issue is the [.Net Microservices Ebook](http://aka.ms/MicroservicesEbook).
 
 It is important to note that the server backend is mocked and all files uploaded are immediately discarded.
-
-## Found the problem?
-
-If anyone finds a way to either change the configuration of the javascript upload api, or of the WAF so that this issue is fixed, please raise an issue at [https://github.com/elexisvenator/AzureWAF-chunked-upload-test/issues](https://github.com/elexisvenator/AzureWAF-chunked-upload-test/issues) so that everyone can fix the issue for themselves.
